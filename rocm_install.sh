@@ -110,14 +110,32 @@ python3 -m pip install --prefer-binary --upgrade \
     diffusers \
     || exit $?
 
+# this is needed to avoid flash-attn installing the CUDA version of flash-attn
+# and then onnxruntime-rocm installing the ROCm version of flash-attn, which
+# causes import errors. We need to uninstall flash-attn in between to make sure
+# only the ROCm version is installed.
 python3 -m pip uninstall flash-attn
+
+# install onnxruntime and optimum[onnxruntime] from the ROCm repo to make sure
+# we get all the dependencies
 python3 -m pip install -f https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/ \
     --prefer-binary \
     optimum[onnxruntime] \
     || exit $?
+
+# uninstall onnxruntime and optimum[onnxruntime], we will reinstall them later
+# to make sure we get the ROCm version of onnx and onnxslim. We also uninstall
+# onnxruntime_migraphx and onnxruntime-rocm to make sure we get all the
+# dependencies for optimum[onnxruntime].
+
 python3 -m pip uninstall \
-    onnxruntime onnxruntime-gpu onnxruntime_migraphx onnxruntime-rocm onnxruntime-genai optimum[onnxruntime] onnx onnxslim -y
+    onnxruntime onnxruntime-gpu onnxruntime_migraphx onnxruntime-rocm onnxruntime-genai optimum[onnxruntime] onnx onnxslim -y \
     || exit $?
+
+# reinstall onnxruntime and optimum[onnxruntime] from the ROCm repo to get the
+# ROCm version of onnx, and onnxslim. We also install onnxruntime_migraphx and
+# onnxruntime-rocm to make sure we get all the dependencies for
+# optimum[onnxruntime].
 python3 -m pip install --prefer-binary -f https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/  \
     --prefer-binary \
     onnxruntime_migraphx \
@@ -126,12 +144,15 @@ python3 -m pip install --prefer-binary -f https://repo.radeon.com/rocm/manylinux
     onnxslim \
     || exit $?
 
+# reinstall optimum[onnxruntime], disable dependencies to avoid upgrading
+# onnxruntime to the non ROCm version
 python3 -m pip install -f https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/ \
     --prefer-binary \
     optimum[onnxruntime] \
     --no-deps \
     || exit $?
 
+# general support
 python3 -m pip install --prefer-binary --upgrade \
     --upgrade-strategy eager \
     idna==3.7 \
