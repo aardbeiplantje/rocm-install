@@ -3,7 +3,6 @@
 
 export TARGET_DIR=${TARGET_DIR:-"$HOME/rocm"}
 export XDG_CACHE_HOME="/var/tmp/pip-cache"
-export TMPDIR="/var/tmp"
 export PIP_BREAK_SYSTEM_PACKAGES=1
 export THEROCK_VERSION=7.12.0a20260203
 export THEROCK_TAR=therock-dist-linux-gfx1151-${THEROCK_VERSION}.tar.gz
@@ -13,45 +12,28 @@ export CXX_INCLUDE_PATH=$THEROCK_DIR/include
 export LD_LIBRARY_PATH=$THEROCK_DIR/lib:$THEROCK_DIR/lib64
 export PATH=$THEROCK_DIR/bin:$TARGET_DIR/bin:$PATH
 
-ROCM_VERSION=$THEROCK_VERSION
-
-# from https://rocm.nightlies.amd.com/v2/gfx1151/torch/
-#TORCH_VERSION=2.9.1+rocm$ROCM_VERSION
-#TORCHAUDIO_VERSION=2.9.0+rocm$ROCM_VERSION
-#TORCHVISION_VERSION=0.22.1+rocm$ROCM_VERSION
-
-# from https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/
-#TORCH_VERSION=2.10.0.dev20260113+Brocm7.2.0.lw.gitdea53f5b
-#TORCHAUDIO_VERSION=2.10.0+rocm7.2.0.git3b0e7a6f
-#TORCHVISION_VERSION=0.25.0+rocm7.2.0.gitaa35ca19
-#TRITON_VERSION=3.5.1+rocm7.2.0.gita272dfa8
-
-# from https://download.pytorch.org/whl/nightly/rocm7.1/
-#TORCH_VERSION=2.11.0.dev20260204+rocm7.1
-#TORCHVISION_VERSION=0.26.0.dev20260206+rocm7.1
-#TORCHAUDIO_VERSION=2.11.0.dev20260206+rocm7.1
-#TRITON_VERSION=3.6.0+git9844da95
-
-
 # setup directories
-mkdir -p "${XDG_CACHE_HOME}" "${TMPDIR}" "${TARGET_DIR}" \
+mkdir -p "${XDG_CACHE_HOME}" "${TARGET_DIR}" \
     || exit $?
 
 # install amdgpu driver
-amdgpu_deb="${XDG_CACHE_HOME}/amdgpu-install_7.2.70200-1_all.deb"
-if [ ! -f "${amdgpu_deb}" ]; then
-    (
-    cd "${XDG_CACHE_HOME}" && \
-        wget https://repo.radeon.com/amdgpu-install/latest/ubuntu/noble/${amdgpu_deb##*/} || exit $?
-    ) || exit $?
+if [ "${INSTALL_AMDGPU:-0}" = 0 ]; then
+    echo "Skipping AMDGPU driver installation. Set INSTALL_AMDGPU=1 to install it."
+else
+    amdgpu_deb="${XDG_CACHE_HOME}/amdgpu-install_7.2.70200-1_all.deb"
+    if [ ! -f "${amdgpu_deb}" ]; then
+        (
+        cd "${XDG_CACHE_HOME}" && \
+            wget https://repo.radeon.com/amdgpu-install/latest/ubuntu/noble/${amdgpu_deb##*/} || exit $?
+        ) || exit $?
+    fi
+    sudo apt install ${amdgpu_deb} -y
+    sudo apt install amdgpu-install -y
+    sudo amdgpu-install --usecase=rocm,hiplibsdk,graphics,mllib,mlsdk,openmpsdk,openclsdk,opencl,lrt,rocmdevtools,rocmdev --no-dkms -y
 fi
-#sudo apt install ${amdgpu_deb} -y
-#sudo apt install amdgpu-install -y
-#sudo amdgpu-install --usecase=rocm,hiplibsdk,graphics,mllib,mlsdk,openmpsdk,openclsdk,opencl,lrt,rocmdevtools,rocmdev --no-dkms -y
-
 
 # Install python3-venv if not already installed
-#sudo apt install python3-venv -y
+dpkg -s python3-venv &> /dev/null || sudo apt install python3-venv -y
 
 # create a venv in TARGET_DIR
 python3 -m venv "$TARGET_DIR" \
@@ -77,12 +59,6 @@ if [ ! -d "$THEROCK_DIR" ]; then
 else
     echo "TheRock ROCm directory already exists. Skipping extraction."
 fi
-
-   # https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/torch-2.7.1%2Brocm7.2.0.lw.git262e50d5-cp312-cp312-linux_x86_64.whl \
-   # https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/torchaudio-2.9.0%2Brocm7.2.0.gite3c6ee2b-cp312-cp312-linux_x86_64.whl \
-   # https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/torchvision-0.25.0%2Brocm7.2.0.gitaa35ca19-cp312-cp312-linux_x86_64.whl \
-   # https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/triton-3.3.1%2Brocm7.2.0.git28a7371e-cp312-cp312-linux_x86_64.whl \
-   # https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/tf_nightly_rocm-2.21.0.dev0%2Bselfbuilt-cp312-cp312-manylinux_2_28_x86_64.whl \
 
 python3 -m pip install --prefer-binary --upgrade \
     --upgrade-strategy eager \
@@ -135,7 +111,7 @@ python3 -m pip install --prefer-binary --upgrade \
     || exit $?
 
 python3 -m pip uninstall flash-attn
-pip3 install -f https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/ \
+python3 -m pip install -f https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/ \
     --prefer-binary \
     optimum[onnxruntime] \
     || exit $?
@@ -149,12 +125,20 @@ python3 -m pip install --prefer-binary -f https://repo.radeon.com/rocm/manylinux
     onnx \
     onnxslim \
     || exit $?
-pip3 install -f https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/ \
+
+python3 -m pip install -f https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/ \
     --prefer-binary \
     optimum[onnxruntime] \
     --no-deps \
     || exit $?
-exit
+
+python3 -m pip install --prefer-binary --upgrade \
+    --upgrade-strategy eager \
+    idna==3.7 \
+    hf \
+    kagglehub \
+    awscli \
+    || exit $?
 
 # ultralytics/yolo, but with ROCm PyTorch. Make sure those don't get upgraded
 python3 -m pip install --prefer-binary --upgrade \
@@ -163,16 +147,8 @@ python3 -m pip install --prefer-binary --upgrade \
     --extra-index-url https://huggingface.github.io/autogptq-index/whl/rocm573/ \
     --extra-index-url https://download.pytorch.org/whl/nightly/rocm7.1 \
     --pre \
-    torch==${TORCH_VERSION} \
-    torchaudio==${TORCHAUDIO_VERSION} \
-    torchvision==${TORCHVISION_VERSION} \
-    triton_rocm==${TRITON_VERSION} \
-    idna==3.7 \
     numpy==2.2.6 \
     "fsspec[http]<=2025.10.0,>=2023.1.0" \
-    hf \
-    kagglehub \
-    awscli \
     ultralytics \
     yolov8 \
     'onnx>=1.12.0,<=1.19.1' \
@@ -180,20 +156,20 @@ python3 -m pip install --prefer-binary --upgrade \
     || exit $?
 
 if [ "${INSTALL_VLLM:-0}" = 1 -a -d "$HOME/vllm" ]; then
-python3 -m pip install --prefer-binary --upgrade \
-    --upgrade-strategy eager \
-    --extra-index-url https://rocm.nightlies.amd.com/v2/gfx1151/ \
-    --extra-index-url https://huggingface.github.io/autogptq-index/whl/rocm573/ \
-    --extra-index-url https://download.pytorch.org/whl/nightly/rocm7.1 \
-    --only-binary=:all: \
-    --pre \
-    torch==${TORCH_VERSION} \
-    torchaudio==${TORCHAUDIO_VERSION} \
-    torchvision==${TORCHVISION_VERSION} \
-    triton_rocm==${TRITON_VERSION} \
-    idna==3.7 \
-    numpy==2.2.6 \
-    ninja cmake wheel pybind11 \
-    vllm==0.13.0 \
-    || exit $?
+    python3 -m pip install --prefer-binary --upgrade \
+        --upgrade-strategy eager \
+        --extra-index-url https://rocm.nightlies.amd.com/v2/gfx1151/ \
+        --extra-index-url https://huggingface.github.io/autogptq-index/whl/rocm573/ \
+        --extra-index-url https://download.pytorch.org/whl/nightly/rocm7.1 \
+        --only-binary=:all: \
+        --pre \
+        torch==${TORCH_VERSION} \
+        torchaudio==${TORCHAUDIO_VERSION} \
+        torchvision==${TORCHVISION_VERSION} \
+        triton_rocm==${TRITON_VERSION} \
+        idna==3.7 \
+        numpy==2.2.6 \
+        ninja cmake wheel pybind11 \
+        vllm==0.13.0 \
+        || exit $?
 fi
