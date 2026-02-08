@@ -60,6 +60,21 @@ else
     echo "TheRock ROCm directory already exists. Skipping extraction."
 fi
 
+# uninstall tensorflow-rocm + install tf-keras
+python3 -m pip uninstall tensorflow-rocm -y \
+    || exit $?
+python3 -m pip install --prefer-binary --upgrade \
+    --upgrade-strategy eager \
+    --index-url https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/ \
+    --find-links https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/ \
+    --extra-index-url https://download.pytorch.org/whl/nightly/rocm7.2 \
+    --extra-index-url https://pypi.org/simple \
+    --extra-index-url https://huggingface.github.io/autogptq-index/whl/rocm573/ \
+    --extra-index-url https://rocm.nightlies.amd.com/v2/gfx1151/ \
+    tf-keras \
+    --no-deps \
+    || exit $?
+
 python3 -m pip install --prefer-binary --upgrade \
     --upgrade-strategy eager \
     --index-url https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/ \
@@ -79,7 +94,6 @@ python3 -m pip install --prefer-binary --upgrade \
     https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/jax_rocm7_plugin-0.8.0%2Brocm7.2.0-cp312-cp312-manylinux_2_28_x86_64.whl \
     https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/jax_rocm7_pjrt-0.8.0%2Brocm7.2.0-py3-none-manylinux_2_28_x86_64.whl \
     torchrl \
-    tf-keras \
     https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/transformer_engine-2.4.0-py3-none-any.whl \
     https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/transformer_engine_rocm-2.4.0-py3-none-manylinux_2_28_x86_64.whl \
     transformer-engine-rocm \
