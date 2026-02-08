@@ -75,12 +75,11 @@ python3 -m pip install --prefer-binary --upgrade \
     https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/torchaudio-2.9.0%2Brocm7.2.0.gite3c6ee2b-cp312-cp312-linux_x86_64.whl \
     https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/triton-3.5.1%2Brocm7.2.0.gita272dfa8-cp312-cp312-linux_x86_64.whl \
     https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/tensorflow_rocm-2.20.0.dev0%2Bselfbuilt-cp312-cp312-manylinux_2_28_x86_64.whl \
+    https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/jaxlib-0.8.0%2Brocm7.2.0-cp312-cp312-manylinux_2_27_x86_64.whl \
+    https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/jax_rocm7_plugin-0.8.0%2Brocm7.2.0-cp312-cp312-manylinux_2_28_x86_64.whl \
+    https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/jax_rocm7_pjrt-0.8.0%2Brocm7.2.0-py3-none-manylinux_2_28_x86_64.whl \
     torchrl \
     tf-keras \
-    jax-rocm7-pjrt \
-    jax-rocm7-plugin \
-    jax \
-    jaxlib \
     https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/transformer_engine-2.4.0-py3-none-any.whl \
     https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/transformer_engine_rocm-2.4.0-py3-none-manylinux_2_28_x86_64.whl \
     transformer-engine-rocm \
@@ -89,9 +88,6 @@ python3 -m pip install --prefer-binary --upgrade \
     numpy==2.2.6 \
     "websockets>=12.0" \
     "fsspec[http]<=2025.10.0,>=2023.1.0" \
-    'transformers<5,>=4.56.0' \
-    transformers==4.56.1 \
-    transformer_engine-rocm \
     hf_transfer \
     setuptools==80.10.2 \
     more_itertools \
@@ -99,14 +95,13 @@ python3 -m pip install --prefer-binary --upgrade \
     hip-python \
     datasets \
     safetensors \
-    'huggingface-hub<1.0,>=0.34.0' \
     'opencv-python-headless==4.10.0.84' \
     'opencv-python>=4.6.0' \
     idna==3.7 \
     numpy==2.2.6 \
     matplotlib \
     tensorboard \
-    "fsspec[http]<=2025.10.0,>=2023.1.0" \
+    huggingface_hub \
     diffusers \
     || exit $?
 
@@ -120,6 +115,7 @@ python3 -m pip uninstall flash-attn
 # we get all the dependencies
 python3 -m pip install -f https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/ \
     --prefer-binary \
+    "fsspec[http]<=2025.10.0,>=2023.1.0" \
     optimum[onnxruntime] \
     || exit $?
 
@@ -132,34 +128,38 @@ python3 -m pip uninstall \
     onnxruntime onnxruntime-gpu onnxruntime_migraphx onnxruntime-rocm onnxruntime-genai optimum[onnxruntime] onnx onnxslim -y \
     || exit $?
 
+# reinstall optimum[onnxruntime], disable dependencies to avoid upgrading
+# onnxruntime to the non ROCm version
+python3 -m pip install -f https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/ \
+    --prefer-binary \
+    "fsspec[http]<=2025.10.0,>=2023.1.0" \
+    optimum[onnxruntime] \
+    --no-deps \
+    || exit $?
+
 # reinstall onnxruntime and optimum[onnxruntime] from the ROCm repo to get the
 # ROCm version of onnx, and onnxslim. We also install onnxruntime_migraphx and
 # onnxruntime-rocm to make sure we get all the dependencies for
 # optimum[onnxruntime].
 python3 -m pip install --prefer-binary -f https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/  \
     --prefer-binary \
+    "fsspec[http]<=2025.10.0,>=2023.1.0" \
     onnxruntime_migraphx \
     onnxruntime-rocm \
     onnx \
     onnxslim \
     || exit $?
 
-# reinstall optimum[onnxruntime], disable dependencies to avoid upgrading
-# onnxruntime to the non ROCm version
-python3 -m pip install -f https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/ \
-    --prefer-binary \
-    optimum[onnxruntime] \
-    --no-deps \
-    || exit $?
-
 # general support
 python3 -m pip install --prefer-binary --upgrade \
     --upgrade-strategy eager \
+    "fsspec[http]<=2025.10.0,>=2023.1.0" \
     idna==3.7 \
-    hf \
     kagglehub \
     awscli \
     || exit $?
+
+exit
 
 # ultralytics/yolo, but with ROCm PyTorch. Make sure those don't get upgraded
 python3 -m pip install --prefer-binary --upgrade \
