@@ -8,10 +8,8 @@ export ROCM_PATH=${ROCM_PATH?"ROCM_PATH environment variable is not set. Please 
 export ROCM_PATH=$(readlink -f "$ROCM_PATH")
 export HIP_PATH=$ROCM_PATH
 
-# This is the critical fix: The compiler needs to know where the bitcode is
+# The compiler needs to know where the bitcode is
 export HIP_DEVICE_LIB_PATH=$ROCM_PATH/lib/llvm/amdgcn/bitcode
-
-echo HIP_DEVICE_LIB_PATH $HIP_DEVICE_LIB_PATH
 
 # Configure with explicit compiler paths and architecture
 # We add --rocm-path directly to the HIP flags to stop Clang from complaining
@@ -23,6 +21,7 @@ cmake .. \
     -DGGML_HIP_UMA=ON \
     -DGGML_HIP_GRAPHS=OFF \
     -DGGML_HIP_ROCWMMA_FATTN=ON \
+    -DGGML_HIP_FATTN=ON \
     -DGGML_OPENMP=OFF \
     -DGGML_CUDA_FORCE_CUBLAS=OFF \
     -DGGML_STATIC=OFF \
