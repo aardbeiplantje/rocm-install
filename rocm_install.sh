@@ -4,7 +4,7 @@
 export TARGET_DIR=${TARGET_DIR:-"$HOME/rocm"}
 export XDG_CACHE_HOME="/var/tmp/pip-cache"
 export PIP_BREAK_SYSTEM_PACKAGES=1
-export THEROCK_VERSION=7.12.0a20260203
+export THEROCK_VERSION=7.12.0a20260205
 export THEROCK_TAR=therock-dist-linux-gfx1151-${THEROCK_VERSION}.tar.gz
 export THEROCK_DIR=${ROCM_PATH:-"$TARGET_DIR/rocm-$THEROCK_VERSION"}
 export LLVM_PATH="$THEROCK_DIR/llvm"
@@ -89,7 +89,7 @@ python3 -m pip install --prefer-binary --upgrade \
     https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/torchvision-0.24.0%2Brocm7.2.0.gitb919bd0c-cp312-cp312-linux_x86_64.whl \
     https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/torchaudio-2.9.0%2Brocm7.2.0.gite3c6ee2b-cp312-cp312-linux_x86_64.whl \
     https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/triton-3.5.1%2Brocm7.2.0.gita272dfa8-cp312-cp312-linux_x86_64.whl \
-    https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/tensorflow_rocm-2.20.0.dev0%2Bselfbuilt-cp312-cp312-manylinux_2_28_x86_64.whl \
+    https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/tf_nightly_rocm-2.21.0.dev0%2Bselfbuilt-cp312-cp312-manylinux_2_28_x86_64.whl \
     https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/jaxlib-0.8.0%2Brocm7.2.0-cp312-cp312-manylinux_2_27_x86_64.whl \
     https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/jax_rocm7_plugin-0.8.0%2Brocm7.2.0-cp312-cp312-manylinux_2_28_x86_64.whl \
     https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/jax_rocm7_pjrt-0.8.0%2Brocm7.2.0-py3-none-manylinux_2_28_x86_64.whl \
