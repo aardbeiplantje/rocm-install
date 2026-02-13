@@ -25,10 +25,12 @@ echo 0 > /proc/sys/kernel/numa_balancing
 cat /proc/sys/kernel/numa_balancing
 EOF
 
-export ROCM_PATH=~/therock-dist-linux-gfx1151-7.12.0a20260203
+export ROCM_PATH=${ROCM_PATH?"ROCM_PATH environment variable is not set. Please set it to the path of your ROCm installation."}
 export LD_LIBRARY_PATH=${ROCM_PATH}:$LD_LIBRARY_PATH
 export PATH=$ROCM_PATH/bin:$PATH
-source /opt/rocm/bin/activate
+if [ -f ~/rocm/bin/activate ]; then
+    source ~/rocm/bin/activate
+fi
 export HF_HUB_ENABLE_HF_TRANSFER=0
 export HF_HUB_DISABLE_XET=1
 export HF_HOME="/mnt/data/huggingface"
