@@ -26,7 +26,7 @@ fi
 HERE="$BASH_SOURCE"
 HERE="${HERE%/*}"
 MODELS_DIR=${MODELS_DIR?"Please set MODELS_DIR to the directory where your llama.cpp models are stored (e.g., /models)"}
-LLAMA_PRESETS="${LLAMA_PRESETS:-$HERE/llama_presets.ini}"
+LLAMA_PRESETS="${LLAMA_PRESETS:-$HERE/llama_server.ini}"
 cd $MODELS_DIR || exit $?
 exec $BIND_CMD $LLAMA_CPP_DIR/bin/llama-server \
     --models-preset "${LLAMA_PRESETS}" \
