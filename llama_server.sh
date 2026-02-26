@@ -14,6 +14,7 @@ export ROCBLAS_USE_HIPBLASLT=0
 
 # Enable Unified Memory for that massive 128GB pool
 export GGML_CUDA_ENABLE_UNIFIED_MEMORY=1
+export GGML_ROCM_FORCE_TILING_ALLOCATOR=1
 export HSA_OVERRIDE_GFX_VERSION=11.5.1
 
 # Using numactl to bind to the first CCD (0-7) and its local memory. 
