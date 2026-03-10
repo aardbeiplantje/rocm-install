@@ -24,6 +24,17 @@ if command -v numactl &> /dev/null; then
     BIND_CMD="numactl --cpunodebind=0 --membind=0"
 fi
 
+# Force a larger workspace
+export GGML_HIP_ALLOC_GRAPH_RESERVE=2048
+export ROCM_METADATA_WAIT_TIMEOUT=100
+
+# Ensure the recurrent states (DeltaNet) are offloaded to the GPU
+# This is critical for Qwen3-Next performance
+export GGML_HIP_FORCE_RS_GPU=1
+export GGML_HIP_FORCE_KV_GPU=1
+export GGML_CUDA_ENABLE_UNIFIED_MEMORY=1
+export GGML_HIP_GRAPHS=0
+
 HERE="$BASH_SOURCE"
 HERE="${HERE%/*}"
 MODELS_DIR=${MODELS_DIR?"Please set MODELS_DIR to the directory where your llama.cpp models are stored (e.g., /models)"}
@@ -35,6 +46,7 @@ exec $BIND_CMD $LLAMA_CPP_DIR/bin/llama-server \
     --no-webui \
     --verbose \
     --verbose-prompt \
+    --split-mode none \
     -lv 3 \
     --host :: \
     --port 8000 \
