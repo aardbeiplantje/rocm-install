@@ -35,11 +35,16 @@ export GGML_HIP_FORCE_KV_GPU=1
 export GGML_CUDA_ENABLE_UNIFIED_MEMORY=1
 export GGML_HIP_GRAPHS=0
 
+export LLAMA_LOG_COLORS=1
+export LLAMA_LOG_TIMESTAMPS=1
+export LLAMA_LOG_PREFIX=1
+
 HERE="$BASH_SOURCE"
 HERE="${HERE%/*}"
 MODELS_DIR=${MODELS_DIR?"Please set MODELS_DIR to the directory where your llama.cpp models are stored (e.g., /models)"}
 LLAMA_PRESETS="${LLAMA_PRESETS:-$HERE/llama_server.ini}"
 cd $MODELS_DIR || exit $?
+BIND_CMD=
 exec $BIND_CMD $LLAMA_CPP_DIR/bin/llama-server \
     --models-preset "${LLAMA_PRESETS}" \
     --models-dir "$MODELS_DIR" \
@@ -47,7 +52,8 @@ exec $BIND_CMD $LLAMA_CPP_DIR/bin/llama-server \
     --verbose \
     --verbose-prompt \
     --split-mode none \
-    -lv 3 \
+    --log-timestamps \
+    --log-verbosity 3 \
     --host :: \
     --port 8000 \
     "$@"
