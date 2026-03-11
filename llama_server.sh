@@ -16,12 +16,15 @@ export ROCBLAS_USE_HIPBLASLT=0
 export GGML_CUDA_ENABLE_UNIFIED_MEMORY=1
 export GGML_ROCM_FORCE_TILING_ALLOCATOR=1
 export HSA_OVERRIDE_GFX_VERSION=11.5.1
+export HIP_VISIBLE_DEVICES=0
 
 # Ensure the recurrent states (DeltaNet) are offloaded to the GPU
 # This is critical for Qwen3-Next performance
 export GGML_HIP_FORCE_RS_GPU=1
 export GGML_HIP_FORCE_KV_GPU=1
 export GGML_HIP_GRAPHS=0
+
+export HSA_FORCE_FINE_GRAIN_PCIE=1
 
 # Force a larger workspace
 export GGML_HIP_ALLOC_GRAPH_RESERVE=2048
@@ -31,6 +34,9 @@ export ROCM_ALLOW_INT8_MIXED_PRECISION=1
 export LLAMA_LOG_COLORS=1
 export LLAMA_LOG_TIMESTAMPS=1
 export LLAMA_LOG_PREFIX=1
+
+export HSA_ENABLE_SDMA=0
+export AMD_DEBUG=high
 
 # Using numactl to bind to the first CCD (0-7) and its local memory. 
 # This reduces Infinity Fabric noise while the GPU is slamming the memory controller.
@@ -53,7 +59,6 @@ exec $BIND_CMD $LLAMA_CPP_DIR/bin/llama-server \
     --verbose \
     --verbose-prompt \
     --split-mode none \
-    --log-timestamps \
     --log-verbosity 3 \
     --host :: \
     --port 8000 \
