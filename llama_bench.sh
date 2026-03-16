@@ -53,11 +53,48 @@ if command -v numactl &> /dev/null; then
     BIND_CMD="numactl --cpunodebind=0 --membind=0"
 fi
 
-exec $BIND_CMD ~/llama.cpp/build/bin/llama-bench \
-    -mmp 0 \
-    -b 4096 \
-    -ub 1024 \
-    -t 8 \
-    -tb 8 \
-    -fa 1 \
-    "$@"
+# If user provides arguments, pass them directly to llama-bench
+if [ $# -gt 0 ]; then
+    exec $BIND_CMD ~/llama.cpp/build/bin/llama-bench \
+        -mmp 0 \
+        -b 4096 \
+        -ub 1024 \
+        -t 8 \
+        -fa 1 \
+        "$@"
+fi
+
+# Otherwise run comprehensive test suite
+echo "======================================================================"
+echo "Running comprehensive benchmark suite for Strix Halo"
+echo "======================================================================"
+echo ""
+
+# Test 1: Standard prompt processing sizes
+echo ">>> Test 1: Prompt Processing (pp) at various sizes"
+$BIND_CMD ~/llama.cpp/build/bin/llama-bench \
+    -mmp 0 -b 4096 -ub 1024 -t 8 -fa 1 \
+    -pg 512,0 -pg 1024,0 -pg 2048,0 -pg 4096,0 -pg 8192,0
+
+echo ""
+echo ">>> Test 2: Text Generation (tg) at various batch sizes"
+$BIND_CMD ~/llama.cpp/build/bin/llama-bench \
+    -mmp 0 -b 4096 -ub 1024 -t 8 -fa 1 \
+    -pg 0,32 -pg 0,64 -pg 0,128 -pg 0,256 -pg 0,512
+
+echo ""
+echo ">>> Test 3: Mixed workloads (realistic usage patterns)"
+$BIND_CMD ~/llama.cpp/build/bin/llama-bench \
+    -mmp 0 -b 4096 -ub 1024 -t 8 -fa 1 \
+    -pg 512,128 -pg 1024,128 -pg 2048,256 -pg 4096,512 -pg 8192,512
+
+echo ""
+echo ">>> Test 4: Long context processing (stress test)"
+$BIND_CMD ~/llama.cpp/build/bin/llama-bench \
+    -mmp 0 -b 4096 -ub 1024 -t 8 -fa 1 \
+    -pg 16384,0 -pg 32768,0 -pg 65536,0
+
+echo ""
+echo "======================================================================"
+echo "Benchmark suite complete!"
+echo "======================================================================"
