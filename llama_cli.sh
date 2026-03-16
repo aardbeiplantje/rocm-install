@@ -2,7 +2,7 @@
 
 # --- Environment Setup ---
 # Your specific ROCm 7.12 build for gfx1151
-#export ROCM_PATH=${ROCM_PATH:-~/therock-dist-linux-gfx1151-7.12.0a20260203}
+export ROCM_PATH=${ROCM_PATH:-~/therock-dist-linux-gfx1151-latest}
 export LD_LIBRARY_PATH=$ROCM_PATH/lib:~/llama.cpp/build/
 
 # CRITICAL: Fix for ROCm 7.2+ hipBLASLt workspace faults on Strix Halo
