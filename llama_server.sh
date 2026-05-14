@@ -63,7 +63,6 @@ exec $BIND_CMD $LLAMA_CPP_DIR/bin/llama-server \
     --models-dir "$MODELS_DIR" \
     --no-webui \
     --verbose \
-    --verbose-prompt \
     --split-mode none \
     --log-verbosity 3 \
     --host :: \

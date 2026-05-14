@@ -4,9 +4,6 @@
 export TARGET_DIR=${TARGET_DIR:-"$HOME/rocm"}
 export XDG_CACHE_HOME="/var/tmp/pip-cache"
 export PIP_BREAK_SYSTEM_PACKAGES=1
-export THEROCK_VERSION=7.12.0a20260205
-export THEROCK_TAR=therock-dist-linux-gfx1151-${THEROCK_VERSION}.tar.gz
-export THEROCK_DIR=${ROCM_PATH:-"$TARGET_DIR/rocm-$THEROCK_VERSION"}
 export LLVM_PATH="$THEROCK_DIR/llvm"
 export CXX_INCLUDE_PATH=$THEROCK_DIR/include
 export LD_LIBRARY_PATH=$THEROCK_DIR/lib:$THEROCK_DIR/lib64
@@ -42,38 +39,52 @@ source "$TARGET_DIR/bin/activate" \
     || exit $?
 
 # untar TheRock ROCm tarball in the venv TARGET_DIR
-if [ ! -d "$THEROCK_DIR" ]; then
-    echo "Downloading TheRock ROCm tarball..."
-    if [ ! -f "${XDG_CACHE_HOME}/$THEROCK_TAR" ]; then
-        (
-        cd "${XDG_CACHE_HOME}" && \
-            wget https://therock-nightly-tarball.s3.amazonaws.com/$THEROCK_TAR \
-                || exit $?
-        ) || exit $?
-    fi
-    echo "Extracting TheRock ROCm tarball..."
-    mkdir -p "$THEROCK_DIR" \
-        || exit $?
-    tar -C "$THEROCK_DIR" -xzf "${XDG_CACHE_HOME}/$THEROCK_TAR" \
-        || exit $?
+if [ "${INSTALL_THE_ROCK:-0}" = 0 ]; then
+    echo "Skipping TheRock install. Set INSTALL_THE_ROCK=1 to install it."
 else
-    echo "TheRock ROCm directory already exists. Skipping extraction."
+    THEROCK_VERSION=${THEROCK_VERSION?Need THEROCK_VERSION=7.12.0a20260205}
+    THEROCK_TAR=therock-dist-linux-gfx1151-${THEROCK_VERSION}.tar.gz
+    THEROCK_DIR=${ROCM_PATH:-"$TARGET_DIR/rocm-$THEROCK_VERSION"}
+    if [ ! -d "$THEROCK_DIR" ]; then
+        echo "Downloading TheRock ROCm tarball..."
+        if [ ! -f "${XDG_CACHE_HOME}/$THEROCK_TAR" ]; then
+            (
+            cd "${XDG_CACHE_HOME}" && \
+                wget https://therock-nightly-tarball.s3.amazonaws.com/$THEROCK_TAR \
+                    || exit $?
+            ) || exit $?
+        fi
+        echo "Extracting TheRock ROCm tarball..."
+        mkdir -p "$THEROCK_DIR" \
+            || exit $?
+        tar -C "$THEROCK_DIR" -xzf "${XDG_CACHE_HOME}/$THEROCK_TAR" \
+            || exit $?
+    else
+        echo "TheRock ROCm directory already exists. Skipping extraction."
+    fi
 fi
 
 # uninstall tensorflow-rocm + install tf-keras
 python3 -m pip uninstall tensorflow-rocm -y \
     || exit $?
 python3 -m pip install --prefer-binary --upgrade \
-    --upgrade-strategy eager \
-    --index-url https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/ \
-    --find-links https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/ \
-    --extra-index-url https://download.pytorch.org/whl/nightly/rocm7.2 \
-    --extra-index-url https://pypi.org/simple \
-    --extra-index-url https://huggingface.github.io/autogptq-index/whl/rocm573/ \
-    --extra-index-url https://rocm.nightlies.amd.com/v2/gfx1151/ \
+    --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ \
     tf-keras \
     --no-deps \
     || exit $?
+python3 -m pip install --prefer-binary --upgrade \
+    --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ \
+    "rocm[libraries,devel]" \
+    "rocm[libraries,devel]==7.13.0a20260414" \
+    torchaudio \
+    torchvision \
+    triton \
+    jax_rocm7_plugin \
+    jax_rocm7_pjrt \
+    || exit $?
+
+exit
+
 
 python3 -m pip install --prefer-binary --upgrade \
     --upgrade-strategy eager \
@@ -85,14 +96,8 @@ python3 -m pip install --prefer-binary --upgrade \
     --extra-index-url https://rocm.nightlies.amd.com/v2/gfx1151/ \
     --pre \
     "rocm[libraries,devel]" \
-    https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/torch-2.9.1%2Brocm7.2.0.lw.git7e1940d4-cp312-cp312-linux_x86_64.whl \
-    https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/torchvision-0.24.0%2Brocm7.2.0.gitb919bd0c-cp312-cp312-linux_x86_64.whl \
-    https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/torchaudio-2.9.0%2Brocm7.2.0.gite3c6ee2b-cp312-cp312-linux_x86_64.whl \
-    https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/triton-3.5.1%2Brocm7.2.0.gita272dfa8-cp312-cp312-linux_x86_64.whl \
     https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/tf_nightly_rocm-2.21.0.dev0%2Bselfbuilt-cp312-cp312-manylinux_2_28_x86_64.whl \
     https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/jaxlib-0.8.0%2Brocm7.2.0-cp312-cp312-manylinux_2_27_x86_64.whl \
-    https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/jax_rocm7_plugin-0.8.0%2Brocm7.2.0-cp312-cp312-manylinux_2_28_x86_64.whl \
-    https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/jax_rocm7_pjrt-0.8.0%2Brocm7.2.0-py3-none-manylinux_2_28_x86_64.whl \
     torchrl \
     https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/transformer_engine-2.4.0-py3-none-any.whl \
     https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/transformer_engine_rocm-2.4.0-py3-none-manylinux_2_28_x86_64.whl \
