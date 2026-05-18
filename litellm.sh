@@ -4,9 +4,9 @@ ip=$(ip -6 addr show scope global|grep /128|awk '{print $2}'|cut -d/ -f1|head -n
 echo "Using IP: $ip"
 cat >/tmp/litellm-$LOGNAME.yaml <<EOcfg
 model_list:
-  - model_name: instruct
+  - model_name: litellm-instruct
     litellm_params:
-      model: openai/instruct
+      model: openai/Nemotron-3-Nano-30B-A3B-Q8_0
       api_base: http://[$ip]:8000
       api_key: "not-needed"
 EOcfg
@@ -16,7 +16,7 @@ exec docker run \
     --detach \
     --rm \
     -v /tmp/litellm-$LOGNAME.yaml:/app/config.yaml:ro \
-    -p 4000:4000 \
+    --network=host \
     docker.litellm.ai/berriai/litellm:main-latest \
         --port 4000 \
         --host '::' \
