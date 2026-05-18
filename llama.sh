@@ -1,4 +1,5 @@
 #!/bin/bash
+docker stop llama || true
 LLAMA_DOCKER_IMAGE=${LLAMA_DOCKER_IMAGE:-"registry.aardbeiplantje.link/ai/llama.cpp-gfx1151:latest"}
 HERE="$BASH_SOURCE"
 HERE="${HERE%/*}"
