@@ -10,11 +10,13 @@ model_list:
       api_base: http://[$ip]:8000
       api_key: "not-needed"
 EOcfg
+export OPENAI_API_KEY="not-needed"
 exec docker run \
     --pull=always \
     --name litellm \
     --detach \
     --rm \
+    -e OPENAI_API_KEY \
     -v /tmp/litellm-$LOGNAME.yaml:/app/config.yaml:ro \
     --network=host \
     docker.litellm.ai/berriai/litellm:main-latest \
