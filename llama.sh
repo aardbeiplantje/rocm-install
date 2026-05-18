@@ -5,11 +5,11 @@ HERE="$BASH_SOURCE"
 HERE="${HERE%/*}"
 MODELS_DIR=${MODELS_DIR?"Please set MODELS_DIR to the directory where your llama.cpp models are stored (e.g., /models)"}
 LLAMA_PRESETS="${LLAMA_PRESETS:-$HERE/llama_server.ini}"
+docker rm llama || true
 exec docker run \
     --pull=always \
     --name llama \
     --detach \
-    --rm \
     --network=host \
     --ulimit memlock=-1:-1 \
     --ulimit stack=67108864:67108864 \
