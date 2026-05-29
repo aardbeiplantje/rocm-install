@@ -2,8 +2,9 @@
 
 
 export TARGET_DIR=${TARGET_DIR:-"$HOME/rocm"}
-export XDG_CACHE_HOME="/var/tmp/pip-cache"
+export XDG_CACHE_HOME=${XDG_CACHE_HOME:-/var/tmp/pip-cache}
 export PIP_BREAK_SYSTEM_PACKAGES=1
+export THEROCK_DIR=${ROCM_PATH?Need ROCM_PATH}
 export LLVM_PATH="$THEROCK_DIR/llvm"
 export CXX_INCLUDE_PATH=$THEROCK_DIR/include
 export LD_LIBRARY_PATH=$THEROCK_DIR/lib:$THEROCK_DIR/lib64
@@ -83,7 +84,6 @@ python3 -m pip install --prefer-binary --upgrade \
     jax_rocm7_pjrt \
     || exit $?
 
-exit
 
 
 python3 -m pip install --prefer-binary --upgrade \
