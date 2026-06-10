@@ -32,9 +32,10 @@ exec $BIND_CMD ~/llama.cpp/build/bin/llama-cli \
     --color on \
     --no-mmap \
     --no-warmup \
+    --mlock \
     -ngl 999 \
     --flash-attn on \
     -sm none \
-    --batch-size 2048 \
-    --ubatch-size 1024 \
+    --batch-size 1024 \
+    --ubatch-size 128 \
     "$@"
