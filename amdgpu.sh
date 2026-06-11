@@ -44,6 +44,7 @@ export LLVM_PATH=~/rocm/llvm
 export KAGGLEHUB_CACHE=/mnt/data/kaggle-hub
 export XDG_CACHE_HOME="/var/tmp/pip-cache"
 export TMPDIR="/var/tmp"
+export XLA_FLAGS="--xla_gpu_enable_command_buffer="
 #export PYTORCH_HIP_ALLOC_CONF=garbage_collection_threshold:0.6,max_split_size_mb:6144
 
 rocm-smi --setperflevel high

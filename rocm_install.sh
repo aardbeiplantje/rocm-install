@@ -66,8 +66,6 @@ else
 fi
 
 # uninstall tensorflow-rocm + install tf-keras
-python3 -m pip uninstall tensorflow-rocm -y \
-    || exit $?
 python3 -m pip install --prefer-binary --upgrade \
     --index-url https://repo.amd.com/rocm/whl/gfx1151/ \
     "rocm[libraries,devel]" \
@@ -77,23 +75,27 @@ python3 -m pip install --prefer-binary --upgrade \
     || exit $?
 python3 -m pip install --prefer-binary --upgrade \
     --extra-index-url https://repo.amd.com/rocm/whl/gfx1151/ \
-    "jaxlib==0.8.2+rocm7.12.0" \
-    "jax_rocm7_plugin==0.8.2+rocm7.12.0" \
-    "jax_rocm7_pjrt==0.8.2+rocm7.12.0" \
+    "jax_rocm7_plugin==0.9.1+rocm7.13.0" \
+    "jax_rocm7_pjrt==0.9.1+rocm7.13.0" \
     "triton==3.6.0+rocm7.13.0" \
     tf-keras \
     || exit $?
 python3 -m pip install --prefer-binary --upgrade \
-    "jax==0.8.2" \
+    "jax==0.9.1" \
+    "jaxlib==0.9.1" \
+    || exit $?
+python3 -m pip install --prefer-binary --upgrade \
+    https://rocm.frameworks.amd.com/whl/gfx1151/flash_attn-2.8.3-py3-none-any.whl \
     || exit $?
 python3 -m pip install --prefer-binary --upgrade \
     diffusers \
     datasets \
     llamafactory \
     matplotlib \
-    huggingface_hub \
+    huggingface_hub==1.19.0 \
     safetensors \
     tensorboard \
+    transformers==5.6.0 \
     awscli \
     || exit $?
 python3 -m pip install --prefer-binary --upgrade \
@@ -104,19 +106,7 @@ python3 -m pip install --prefer-binary --upgrade \
     wheel \
     pybind11 \
     || exit $?
-exit;
 
-# reinstall onnxruntime and optimum[onnxruntime] from the ROCm repo to get the
-# ROCm version of onnx, and onnxslim. We also install onnxruntime_migraphx and
-# onnxruntime-rocm to make sure we get all the dependencies for
-# optimum[onnxruntime].
-python3 -m pip install --prefer-binary -f https://repo.amd.com/rocm/whl/gfx1151/ \
-    onnxruntime_migraphx \
-    onnxruntime-rocm \
-    onnx \
-    onnxslim \
-    optimum[onnxruntime] \
-    || exit $?
 
 
 # ultralytics/yolo, but with ROCm PyTorch. Make sure those don't get upgraded
@@ -126,21 +116,21 @@ python3 -m pip install --prefer-binary --upgrade \
     --extra-index-url https://huggingface.github.io/autogptq-index/whl/rocm573/ \
     --extra-index-url https://download.pytorch.org/whl/nightly/rocm7.1 \
     --pre \
-    'huggingface-hub<1.0,>=0.33.5' \
+    huggingface_hub==1.19.0 \
     ultralytics \
     yolov8 \
     || exit $?
+exit;
 
-exit
-
-if [ "${INSTALL_VLLM:-0}" = 1 -a -d "$HOME/vllm" ]; then
-    python3 -m pip install --prefer-binary --upgrade \
-        --upgrade-strategy eager \
-        --extra-index-url https://rocm.nightlies.amd.com/v2/gfx1151/ \
-        --extra-index-url https://huggingface.github.io/autogptq-index/whl/rocm573/ \
-        --extra-index-url https://download.pytorch.org/whl/nightly/rocm7.1 \
-        --only-binary=:all: \
-        --pre \
-        vllm \
-        || exit $?
-fi
+# reinstall onnxruntime and optimum[onnxruntime] from the ROCm repo to get the
+# ROCm version of onnx, and onnxslim. We also install onnxruntime_migraphx and
+# onnxruntime-rocm to make sure we get all the dependencies for
+# optimum[onnxruntime].
+python3 -m pip install --prefer-binary -f https://repo.amd.com/rocm/whl/gfx1151/ \
+    transformers==5.6.0 \
+    onnxruntime_migraphx \
+    onnxruntime-rocm \
+    onnx \
+    onnxslim \
+    optimum[onnxruntime] \
+    || exit $?
