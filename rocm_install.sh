@@ -89,12 +89,11 @@ python3 -m pip install --prefer-binary --upgrade \
 python3 -m pip install --prefer-binary --upgrade \
     diffusers \
     datasets \
-    safetensors \
-    matplotlib \
-    tensorboard \
     llamafactory \
+    matplotlib \
     huggingface_hub \
-    hip-python \
+    safetensors \
+    tensorboard \
     awscli \
     || exit $?
 python3 -m pip install --prefer-binary --upgrade \
@@ -105,6 +104,7 @@ python3 -m pip install --prefer-binary --upgrade \
     wheel \
     pybind11 \
     || exit $?
+exit;
 
 # reinstall onnxruntime and optimum[onnxruntime] from the ROCm repo to get the
 # ROCm version of onnx, and onnxslim. We also install onnxruntime_migraphx and
