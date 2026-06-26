@@ -111,11 +111,6 @@ python3 -m pip install --prefer-binary --upgrade \
 
 # ultralytics/yolo, but with ROCm PyTorch. Make sure those don't get upgraded
 python3 -m pip install --prefer-binary --upgrade \
-    --extra-index-url https://repo.amd.com/rocm/whl/gfx1151/ \
-    --extra-index-url https://rocm.nightlies.amd.com/v2/gfx1151/ \
-    --extra-index-url https://huggingface.github.io/autogptq-index/whl/rocm573/ \
-    --extra-index-url https://download.pytorch.org/whl/nightly/rocm7.1 \
-    --pre \
     huggingface_hub==1.19.0 \
     ultralytics \
     yolov8 \
