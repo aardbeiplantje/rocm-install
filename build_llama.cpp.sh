@@ -71,7 +71,7 @@ cmake .. \
     -DGGML_CUDA_FORCE_CUBLAS=OFF \
     \
     `# === Performance Profiling ===` \
-    -DGGML_HIP_EXPORT_METRICS=ON \
+    -DGGML_HIP_EXPORT_METRICS=OFF \
     \
     `# === Build Configuration ===` \
     -DGGML_OPENMP=OFF \
