@@ -2,8 +2,10 @@
 
 # --- Environment Setup ---
 # Your specific ROCm 7.12 build for gfx1151
+LLAMA_CPP_DIR=${LLAMA_CPP_DIR:-~/llama.cpp/build}
+LLAMA_CPP_DIR=$(readlink -f "$LLAMA_CPP_DIR")
 export ROCM_PATH=${ROCM_PATH:-~/therock-dist-linux-gfx1151-latest}
-export LD_LIBRARY_PATH=$ROCM_PATH/lib:~/llama.cpp/build/
+export LD_LIBRARY_PATH=$ROCM_PATH/lib:${LLAMA_CPP_DIR}/bin
 
 # CRITICAL: Fix for ROCm 7.2+ hipBLASLt workspace faults on Strix Halo
 #export ROCBLAS_USE_HIPBLASLT=0
@@ -20,10 +22,8 @@ if command -v numactl &> /dev/null; then
     BIND_CMD="numactl --cpunodebind=0 --membind=0"
 fi
 
-exec $BIND_CMD ~/llama.cpp/build/bin/llama-cli \
+exec $BIND_CMD ${LLAMA_CPP_DIR}/bin/llama-cli \
     -lv 1 \
-    -t 8 \
-    --prio 3 \
     --context-shift \
     --jinja \
     --temp 0 \
@@ -36,6 +36,4 @@ exec $BIND_CMD ~/llama.cpp/build/bin/llama-cli \
     -ngl 999 \
     --flash-attn on \
     -sm none \
-    --batch-size 1024 \
-    --ubatch-size 128 \
     "$@"
