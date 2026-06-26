@@ -10,9 +10,12 @@ export HIP_PLATFORM=amd
 export ROCM_PATH=${ROCM_PATH?"ROCM_PATH environment variable is not set. Please set it to the root of your ROCm installation."}
 export ROCM_PATH=$(readlink -f "$ROCM_PATH")
 export HIP_PATH=$ROCM_PATH
+export PATH=$ROCM_PATH/bin:$PATH
+export HIPCXX="$ROCM_PATH/llvm/bin/clang"
 
 # The compiler needs to know where the bitcode is
 export HIP_DEVICE_LIB_PATH=$ROCM_PATH/lib/llvm/amdgcn/bitcode
+
 
 echo "======================================================================"
 echo "Building llama.cpp for AMD Strix Halo (gfx1151) with ROCm"
@@ -82,7 +85,7 @@ cmake .. \
     -DCMAKE_HIP_COMPILER=$ROCM_PATH/llvm/bin/clang++ \
     -DCMAKE_C_FLAGS="-march=native -O3" \
     -DCMAKE_CXX_FLAGS="-march=native -O3" \
-    -DCMAKE_HIP_FLAGS="--rocm-device-lib-path=$HIP_DEVICE_LIB_PATH --rocm-path=$ROCM_PATH"
+    -DCMAKE_HIP_FLAGS="--rocm-device-lib-path=$HIP_DEVICE_LIB_PATH --rocm-path=$ROCM_PATH -Xarch_device -mwavefrontsize64=false -isystem $ROCM_PATH/include"
 
 # Build with all cores
 echo ""
