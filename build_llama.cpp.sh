@@ -16,6 +16,15 @@ export HIPCXX="$ROCM_PATH/llvm/bin/clang"
 # The compiler needs to know where the bitcode is
 export HIP_DEVICE_LIB_PATH=$ROCM_PATH/lib/llvm/amdgcn/bitcode
 
+HIP_EXTRA_FLAGS="${CMAKE_HIP_FLAGS:-}"
+ROCM_WMMA_INCLUDE="${ROCM_PATH}/include/"
+if [[ -d "$ROCM_WMMA_INCLUDE/rocwmma/internal" ]]; then
+    HIP_EXTRA_FLAGS="-I${ROCM_WMMA_INCLUDE} ${HIP_EXTRA_FLAGS}"
+    echo "Using local rocWMMA headers: $ROCM_WMMA_INCLUDE"
+else
+    echo "Warning: rocWMMA headers not found at $ROCM_WMMA_INCLUDE" >&2
+fi
+
 
 echo "======================================================================"
 echo "Building llama.cpp for AMD Strix Halo (gfx1151) with ROCm"
@@ -31,6 +40,8 @@ cmake .. \
     -DCMAKE_BUILD_TYPE=Release \
     \
     `# === Core HIP/ROCm Configuration ===` \
+    -DGGML_HIP_FORCE_MMQ=ON \
+    -DGGML_VULKAN=ON \
     -DGGML_NATIVE=ON \
     -DGGML_HIP=ON \
     -DGGML_HIPBLAS=ON \
@@ -77,7 +88,10 @@ cmake .. \
     -DGGML_OPENMP=OFF \
     -DGGML_STATIC=OFF \
     -DBUILD_SHARED_LIBS=ON \
+    -DLLAMA_BUILD_WEBUI=OFF \
+    -DLLAMA_USE_PREBUILT_WEBUI=OFF \
     -DLLAMA_BUILD_TESTS=OFF \
+    -DGGML_BUILD_TESTS=OFF \
     \
     `# === Compiler Configuration ===` \
     -DCMAKE_C_COMPILER=$ROCM_PATH/llvm/bin/clang \
@@ -85,13 +99,18 @@ cmake .. \
     -DCMAKE_HIP_COMPILER=$ROCM_PATH/llvm/bin/clang++ \
     -DCMAKE_C_FLAGS="-march=native -O3" \
     -DCMAKE_CXX_FLAGS="-march=native -O3" \
-    -DCMAKE_HIP_FLAGS="--rocm-device-lib-path=$HIP_DEVICE_LIB_PATH --rocm-path=$ROCM_PATH -Xarch_device -mwavefrontsize64=false -isystem $ROCM_PATH/include"
+    -DCMAKE_HIP_FLAGS="--rocm-device-lib-path=$HIP_DEVICE_LIB_PATH --rocm-path=$ROCM_PATH -Xarch_device -mwavefrontsize64=false -isystem $ROCM_PATH/include $HIP_EXTRA_FLAGS"
 
 # Build with all cores
 echo ""
 echo "Building with $(nproc) parallel jobs..."
 cd ..
-cmake --build build --config Release -j$(nproc)
+cmake --build build --config Release -j$(nproc) --target \
+    llama-cli \
+    llama-server \
+    llama-completion \
+    llama-quantize \
+    llama-bench
 
 BUILD_STATUS=$?
 
