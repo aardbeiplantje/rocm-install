@@ -96,7 +96,6 @@ python3 -m pip install --prefer-binary --upgrade \
     safetensors \
     tensorboard \
     transformers==5.6.0 \
-    awscli \
     || exit $?
 python3 -m pip install --prefer-binary --upgrade \
     idna==3.7 \
@@ -106,15 +105,31 @@ python3 -m pip install --prefer-binary --upgrade \
     wheel \
     pybind11 \
     || exit $?
-
-
-
 # ultralytics/yolo, but with ROCm PyTorch. Make sure those don't get upgraded
 python3 -m pip install --prefer-binary --upgrade \
     huggingface_hub==1.19.0 \
     ultralytics \
     yolov8 \
     || exit $?
+
+
+python3 -m pip install --pre torch torchvision torchaudio --index-url https://rocm.nightlies.amd.com/v2/gfx1151/ \
+    || exit $?
+
+python3 -m pip install --prefer-binary --upgrade \
+    comfy-cli \
+    sqlalchemy \
+    comfy_aimdo \
+    blake3 \
+    alembic \
+    comfy_kitchen \
+    torchsde\
+    PyOpenGL-accelerate \
+    comfy-script \
+    nest-asyncio2 \
+    || exit $?
+
+
 exit;
 
 # reinstall onnxruntime and optimum[onnxruntime] from the ROCm repo to get the
