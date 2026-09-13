@@ -94,7 +94,7 @@ python3 -m pip install --prefer-binary --upgrade \
     huggingface_hub==1.19.0 \
     safetensors \
     tensorboard \
-    transformers==5.6.0 \
+    -r $(dirname $BASH_SOURCE)/requirements.txt \
     || exit $?
 python3 -m pip install --prefer-binary --upgrade \
     idna==3.7 \
@@ -127,6 +127,8 @@ python3 -m pip install --prefer-binary --upgrade \
     comfy-script \
     nest-asyncio2 \
     av \
+    gradio \
+    -r $(dirname $BASH_SOURCE)/requirements.txt \
     || exit $?
 
 
