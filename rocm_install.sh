@@ -90,7 +90,6 @@ python3 -m pip install --prefer-binary --upgrade \
 python3 -m pip install --prefer-binary --upgrade \
     diffusers \
     datasets \
-    llamafactory \
     matplotlib \
     huggingface_hub==1.19.0 \
     safetensors \
@@ -127,6 +126,7 @@ python3 -m pip install --prefer-binary --upgrade \
     PyOpenGL-accelerate \
     comfy-script \
     nest-asyncio2 \
+    av \
     || exit $?
 
 
