@@ -128,6 +128,8 @@ python3 -m pip install --prefer-binary --upgrade \
     nest-asyncio2 \
     av \
     gradio \
+    comfyui-manager \
+    matrix-nio \
     -r $(dirname $BASH_SOURCE)/requirements.txt \
     || exit $?
 
