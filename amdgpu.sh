@@ -47,6 +47,6 @@ export TMPDIR="/var/tmp"
 export XLA_FLAGS="--xla_gpu_enable_command_buffer="
 #export PYTORCH_HIP_ALLOC_CONF=garbage_collection_threshold:0.6,max_split_size_mb:6144
 
-rocm-smi --setperflevel high
-rocm-smi --setperflevel auto
-rocm-smi --showtoponuma
+/opt/rocm/core-7.13/bin/rocm-smi --setperflevel high
+/opt/rocm/core-7.13/bin/rocm-smi --setperflevel auto
+/opt/rocm/core-7.13/bin/rocm-smi --showtoponuma
